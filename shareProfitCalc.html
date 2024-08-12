@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="number"], input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .result-item {
+            margin-bottom: 10px;
+            box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Share Calculator</h1>
+        
+        <div class="form-group">
+            <label for="budget">Budget:</label>
+            <input type="number" id="budget" onkeyup="calculate()"  placeholder="Enter your budget">
+        </div>
+        <div class="form-group">
+            <label for="profit">Desired Profit:</label>
+            <input type="number" id="profit" onkeyup="calculate()"  placeholder="Enter desired profit">
+        </div>
+        <div class="form-group">
+            <label for="shares">Share Prices (comma-separated):</label>
+            <input type="text" id="shares" onkeyup="calculate()" placeholder="Enter share prices">
+        </div>
+        <div class="form-group">
+            <button onclick="calculate()">Calculate</button>
+        </div>
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        function calculate() {
+            const budget = parseFloat(document.getElementById('budget').value);
+            const profit = parseFloat(document.getElementById('profit').value);
+            const sharePrices = document.getElementById('shares').value.split(',').map(price => parseFloat(price.trim()));
+
+
+           
+               
+
+             
+           
+                if (isNaN(budget) || isNaN(profit) || sharePrices.some(isNaN)) {
+                    <!-- alert('Please enter valid budget, profit, and share prices.'); -->
+                    return;
+                }
+
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '';
+
+                sharePrices.forEach(price => {
+                    const shares = Math.floor(budget / price);
+                    const totalInvestment = shares * price;
+
+               
+                    
+                    // Calculate the required selling price to achieve the desired profit
+                    const requiredSellingPrice = (totalInvestment + profit) / shares;
+                    const requiredProfitPercentage = ((profit / totalInvestment) * 100).toFixed(2);
+
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    resultItem.innerHTML = `
+                        <p>Share Price: Rs.${price.toFixed(2)}</p>
+                        <p>Number of Shares You Can Buy: ${shares}</p>
+                        <p>Required Selling Price to Achieve Desired Profit: Rs.${requiredSellingPrice.toFixed(2)}</p>
+                        <p>Estimate required Profit Percentage: ${requiredProfitPercentage}%</p>
+                        <p>Total payable without processing charge: Rs.${shares*price.toFixed(2)}</p>
+                    `;
+                    resultsDiv.appendChild(resultItem);
+                });
+            
+        }
+    </script>
+</body>
+</html>

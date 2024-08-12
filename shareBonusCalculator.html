@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bonus Investment Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .calculator {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        .calculator h2 {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: calc(100% - 25px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 5px;
+        }
+        .form-group button {
+            padding: 10px;
+            background: #007bff;
+            border: none;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+        }
+        .share {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .share button {
+            padding: 5px;
+            background: #dc3545;
+            border: none;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .share button:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Bonus Investment Calculator</h2>
+        <div id="shares"></div>
+        <div class="form-group">
+            <button onclick="addShare()">Add Share</button>
+        </div>
+        <div class="form-group">
+            <button onclick="calculateBonus()">Calculate Bonus</button>
+        </div>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        let shareCount = 0;
+
+        function addShare() {
+            shareCount++;
+            const sharesDiv = document.getElementById('shares');
+            const shareDiv = document.createElement('div');
+            shareDiv.classList.add('share');
+            shareDiv.id = `share-${shareCount}`;
+            shareDiv.innerHTML = `
+                <div class="form-group">
+                    <label for="investmentAmount-${shareCount}">Investment Amount (रु):</label>
+                    <input type="number" id="investmentAmount-${shareCount}" placeholder="Enter investment amount">
+                </div>
+                <div class="form-group">
+                    <label for="sharePrice-${shareCount}">Share Price (रु):</label>
+                    <input type="number" id="sharePrice-${shareCount}" placeholder="Enter share price">
+                </div>
+                <div class="form-group">
+                    <label for="bonusPercentage-${shareCount}">Bonus Percentage (%):</label>
+                    <input type="number" id="bonusPercentage-${shareCount}" placeholder="Enter bonus percentage">
+                </div>
+                <div class="form-group">
+                    <label for="dpCharge-${shareCount}">Include DP Charge:</label>
+                    <input type="checkbox" id="dpCharge-${shareCount}" checked disabled>
+                </div>
+                <button onclick="removeShare(${shareCount})">Remove</button>
+            `;
+            sharesDiv.appendChild(shareDiv);
+        }
+
+        function removeShare(id) {
+            const shareDiv = document.getElementById(`share-${id}`);
+            if (shareDiv) {
+                shareDiv.remove();
+            }
+        }
+
+        function calculateBonus() {
+            let maxBonus = -1;
+            let bestShareIndex = -1;
+            let resultHTML = '';
+            for (let i = 1; i <= shareCount; i++) {
+                const investmentAmount = parseFloat(document.getElementById(`investmentAmount-${i}`)?.value);
+                const sharePrice = parseFloat(document.getElementById(`sharePrice-${i}`)?.value);
+                const bonusPercentage = parseFloat(document.getElementById(`bonusPercentage-${i}`)?.value);
+                const includeDPCharge = document.getElementById(`dpCharge-${i}`).checked;
+
+                if (isNaN(investmentAmount) || isNaN(sharePrice) || isNaN(bonusPercentage)) {
+                    continue;
+                }
+
+                const numShares = Math.floor(investmentAmount / sharePrice);
+                const totalPurchaseAmount = numShares * sharePrice;
+                const sebonCommission = (totalPurchaseAmount * 0.015) / 100; // Example: 0.015% SEBON commission rate
+                const brokerCommission = totalPurchaseAmount * 0.0036; // Example: 0.36% broker commission rate
+                const dpCharge = includeDPCharge ? 25 : 0;
+                const totalAmountPaymentToBroker = totalPurchaseAmount + sebonCommission + brokerCommission + dpCharge;
+                const perAmountPaymentToBroker = totalAmountPaymentToBroker / numShares;
+
+                const bonusPerShare = sharePrice * (bonusPercentage / 100);
+                const shareBonus = numShares * bonusPerShare;
+
+                resultHTML += `
+                    <p><strong>Share ${i}:</strong></p>
+                    <p>Number of shares you can buy: ${numShares}</p>
+                    <p>Total purchase amount: रु.${totalPurchaseAmount.toFixed(2)}</p>
+                    <p>SEBON Commission: रु.${sebonCommission.toFixed(2)}</p>
+                    <p>Broker Commission: रु.${brokerCommission.toFixed(2)}</p>
+                    <p>DP Charge: रु.${dpCharge.toFixed(2)}</p>
+                    <p>Total amount payment to broker: रु.${totalAmountPaymentToBroker.toFixed(2)}</p>
+                    <p>Cost Price Per Share: रु.${perAmountPaymentToBroker.toFixed(2)}</p>
+                    <p>Total bonus for this share: रु.${shareBonus.toFixed(2)}</p>
+                    <hr>
+                `;
+
+                if (shareBonus > maxBonus) {
+                    maxBonus = shareBonus;
+                    bestShareIndex = i;
+                }
+            }
+
+            if (bestShareIndex !== -1) {
+                resultHTML += `<p><strong>Share ${bestShareIndex} gives the highest profit with a bonus of रु.${maxBonus.toFixed(2)}</strong></p>`;
+            } else {
+                resultHTML = `<p><strong>No valid shares to compare.</strong></p>`;
+            }
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = resultHTML;
+        }
+    </script>
+</body>
+</html>
